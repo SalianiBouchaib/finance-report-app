@@ -38,12 +38,15 @@ def save_data(data):
 saved_data = load_data()
 
 # Fonction pour créer des inputs avec persistance
-def create_input(label, default_value="", key=None, text_area=False):
+def create_input(label, default_value="", key=None, text_area=False, height=None):
     # Récupérer la valeur sauvegardée si elle existe
     saved_value = saved_data.get(key, default_value)
     
     if text_area:
-        user_input = st.text_area(label, value=saved_value, key=key)
+        if height:
+            user_input = st.text_area(label, value=saved_value, key=key, height=height)
+        else:
+            user_input = st.text_area(label, value=saved_value, key=key)
     else:
         user_input = st.text_input(label, value=saved_value, key=key)
     
@@ -73,6 +76,193 @@ def create_editable_table(data, key):
 def create_expandable_table(title, data, key):
     with st.expander(title):
         return create_editable_table(data, key)
+
+# Fonction pour créer le tableau de comparaison des concurrents avec inputs
+def create_competitor_comparison_table(key):
+    # Définir les critères et concurrents
+    criteres = [
+        "Traduction en temps réel", 
+        "Application mobile", 
+        "Portail web", 
+        "Support multilingue", 
+        "Formation en langue des signes", 
+        "Personnalisation pour secteurs", 
+        "Partenariats avec ONG/écoles", 
+        "Tarification différenciée"
+    ]
+    
+    concurrents = ["Glove Voice", "SignAll", "MotionSavvy", "Kinemic", "DuoSign", "Google Live Transcribe", "Ava"]
+    
+    # Valeurs par défaut du tableau
+    default_values = {
+        "Critères/Concurrents": criteres,
+        "Glove Voice": ["+", "+", "+", "+", "+", "+", "+", "+"],
+        "SignAll": ["+", "-", "-", "-", "-", "-", "T", "T"],
+        "MotionSavvy": ["+", "-", "-", "-", "-", "-", "T", "T"],
+        "Kinemic": ["-", "-", "-", "-", "-", "-", "-", "-"],
+        "DuoSign": ["-", "-", "-", "-", "-", "-", "T", "-"],
+        "Google Live Transcribe": ["-", "+", "-", "+", "-", "-", "-", "+"],
+        "Ava": ["-", "+", "-", "+", "-", "-", "-", "+"]
+    }
+    
+    # Récupérer les données sauvegardées ou utiliser les valeurs par défaut
+    saved_table = saved_data.get(key, default_values)
+    
+    # Créer le dataframe
+    df = pd.DataFrame(saved_table)
+    df = df.set_index("Critères/Concurrents")
+    
+    # Permettre l'édition des valeurs du tableau
+    st.write("### Tableau Comparatif Détaillé des Concurrents")
+    st.write("Modifiez les valeurs en cliquant dessus (+ : présent, - : absent, T : partiellement présent)")
+    
+    edited_df = st.data_editor(
+        df, 
+        key=key,
+        height=400,
+        use_container_width=True
+    )
+    
+    # Sauvegarder les modifications
+    if not edited_df.equals(df):
+        # Ajouter la colonne d'index comme une colonne normale pour la sauvegarde
+        edited_df_save = edited_df.reset_index()
+        saved_data[key] = edited_df_save.to_dict('list')
+        save_data(saved_data)
+    
+    # Afficher la légende
+    st.write("**Légende :**")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.write("• + : Service présent")
+    with col2:
+        st.write("• - : Service absent")
+    with col3:
+        st.write("• T : Service partiellement présent")
+    
+    return edited_df
+
+# Fonction pour créer le Business Model Canvas avec inputs
+def create_business_model_canvas(key_prefix):
+    st.write("## 7. Business Model Canvas (BMC) de Glove Voice")
+    
+    # Définir les couleurs pour chaque section du BMC (comme dans l'image)
+    bmc_colors = {
+        "partenaires": "#ffadb9",    # Rose
+        "activites": "#b388ff",      # Violet
+        "proposition": "#81c784",     # Vert
+        "relations": "#ffb74d",      # Orange
+        "segments": "#4fc3f7",       # Bleu
+        "ressources": "#b388ff",     # Violet (même que activités)
+        "canaux": "#ffb74d",         # Orange (même que relations)
+        "couts": "#ffd54f",          # Jaune
+        "revenus": "#b388ff"         # Violet (même que activités/ressources)
+    }
+    
+    # Créer le canvas avec 3 rangées
+    st.write("#### Cliquez dans chaque case pour modifier le contenu")
+    
+    # Première rangée: Partenaires Clés, Activités Clés, Proposition de Valeur, Relations avec les Clients, Segments de Clientèle
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    with col1:
+        st.markdown(f"<div style='background-color:{bmc_colors['partenaires']};padding:10px;border-radius:5px;height:250px;'>", unsafe_allow_html=True)
+        st.write("**Partenaires Clés**")
+        partenaires = create_input("", 
+                                 "- ONG et Associations : Pour une meilleure diffusion et impact social\n- Établissements Éducatifs : Partenariats pour intégrer Glove Voice dans leur cursus\n- Développeurs : Soutien technique et mises à jour du produit",
+                                 f"{key_prefix}_partenaires",
+                                 text_area=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"<div style='background-color:{bmc_colors['activites']};padding:10px;border-radius:5px;height:250px;'>", unsafe_allow_html=True)
+        st.write("**Activités Clés**")
+        activites = create_input("", 
+                                "- Développement Produit : Amélioration continue de Glove Voice\n- Marketing et Promotion : Campagnes pour sensibiliser et attirer des clients\n- Support et Formation : Assistance technique et formation pour les utilisateurs",
+                                f"{key_prefix}_activites",
+                                text_area=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(f"<div style='background-color:{bmc_colors['proposition']};padding:10px;border-radius:5px;height:250px;'>", unsafe_allow_html=True)
+        st.write("**Proposition de Valeur**")
+        proposition = create_input("", 
+                                  "- Traduction en temps réel de la langue des signes : Facilite la communication entre personnes sourdes et entendantes\n- Accessibilité Multilingue : Adaptation aux divers besoins culturels\n- Formation à la langue des signes : Sensibilisation et éducation pour promouvoir l'inclusion\n- Personnalisation : Solutions adaptées aux besoins spécifiques de chaque secteur",
+                                  f"{key_prefix}_proposition",
+                                  text_area=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown(f"<div style='background-color:{bmc_colors['relations']};padding:10px;border-radius:5px;height:250px;'>", unsafe_allow_html=True)
+        st.write("**Relations avec les Clients**")
+        relations = create_input("", 
+                               "- Support Client : Assistance technique et service après-vente\n- Formation et Sensibilisation : Sessions de formation pour les utilisateurs\n- Feedback Utilisateur : Récolte des retours pour améliorer le produit",
+                               f"{key_prefix}_relations",
+                               text_area=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    with col5:
+        st.markdown(f"<div style='background-color:{bmc_colors['segments']};padding:10px;border-radius:5px;height:250px;'>", unsafe_allow_html=True)
+        st.write("**Segments de Clientèle**")
+        segments = create_input("", 
+                              "- ONG et Associations : Œuvrant pour l'inclusion des personnes sourdes et muettes\n- Établissements Éducatifs : Écoles et universités cherchant à sensibiliser à la langue des signes\n- Entreprises : Sociétés désirant améliorer leur inclusion sociale\n- Particuliers : Utilisateurs souhaitant apprendre et communiquer en langue des signes",
+                              f"{key_prefix}_segments",
+                              text_area=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Deuxième rangée: vide, Ressources Clés, vide, Canaux, vide
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    with col1:
+        st.write("")
+    
+    with col2:
+        st.markdown(f"<div style='background-color:{bmc_colors['ressources']};padding:10px;border-radius:5px;height:230px;'>", unsafe_allow_html=True)
+        st.write("**Ressources Clés**")
+        ressources = create_input("", 
+                                "- Technologie IA : Développement de l'algorithme de traduction\n- Équipe technique : Développeurs et experts en langue des signes\n- Partenariats Stratégiques : Collaborations avec ONG et institutions éducatives",
+                                f"{key_prefix}_ressources",
+                                text_area=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    with col3:
+        st.write("")
+    
+    with col4:
+        st.markdown(f"<div style='background-color:{bmc_colors['canaux']};padding:10px;border-radius:5px;height:230px;'>", unsafe_allow_html=True)
+        st.write("**Canaux**")
+        canaux = create_input("", 
+                            "- Application Mobile : Disponible sur iOS et Android\n- Portail Web : Accès en ligne pour les utilisateurs\n- Partenariats : Collaboration avec écoles, ONG et entreprises\n- Démonstrations et Ateliers : Présentations dans des établissements éducatifs pour promouvoir Glove Voice",
+                            f"{key_prefix}_canaux",
+                            text_area=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    with col5:
+        st.write("")
+    
+    # Troisième rangée: Structure de Coûts, vide, vide, vide, Sources de Revenus
+    col1, col2, col3 = st.columns([2, 1, 2])
+    
+    with col1:
+        st.markdown(f"<div style='background-color:{bmc_colors['couts']};padding:10px;border-radius:5px;height:150px;'>", unsafe_allow_html=True)
+        st.write("**Structure de Coûts**")
+        couts = create_input("", 
+                           "- Développement Technologique : Coûts liés à la création et à la maintenance de l'application et du portail\n- Marketing et Communication : Dépenses pour la promotion et les événements\n- Support Client : Coûts associés à l'assistance technique et à la formation",
+                           f"{key_prefix}_couts",
+                           text_area=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    
+    with col2:
+        st.write("")
+    
+    with col3:
+        st.markdown(f"<div style='background-color:{bmc_colors['revenus']};padding:10px;border-radius:5px;height:150px;'>", unsafe_allow_html=True)
+        st.write("**Sources de Revenus**")
+        revenus = create_input("", 
+                             "- Vente de Licences : Tarification adaptée pour écoles, entreprises et ONG\n- Abonnements : Offres mensuelles ou annuelles pour l'utilisation du service\n- Options Premium : Modèle gratuit pour utilisateurs éducatifs ou petites entreprises, avec extensions payantes",
+                             f"{key_prefix}_revenus",
+                             text_area=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # Fonction pour générer le PDF
 def generate_pdf():
@@ -104,7 +294,7 @@ def generate_pdf():
     normal_style = styles['Normal']
     
     # Titre principal
-    story.append(Paragraph("Glove Voice - Rapport Complet", title_style))
+    story.append(Paragraph(saved_data.get('projet_titre', "Glove Voice - Rapport Complet"), title_style))
     story.append(Spacer(1, 0.2*inch))
     
     # Présentation du projet
@@ -268,6 +458,100 @@ def generate_pdf():
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         story.append(concurrents_table)
+    
+    # Tableau Comparatif Détaillé des Concurrents (nouveau)
+    story.append(Spacer(1, 0.2*inch))
+    story.append(Paragraph("Tableau Comparatif Détaillé des Concurrents", styles['Heading3']))
+    
+    if 'competitors_comparison_table' in saved_data:
+        criteres = saved_data['competitors_comparison_table'].get('Critères/Concurrents', [])
+        
+        # Préparer les données pour le tableau PDF
+        competitors_data = [["Critères/Concurrents", "Glove Voice", "SignAll", "MotionSavvy", "Kinemic", "DuoSign", "Google Live Transcribe", "Ava"]]
+        
+        for i, critere in enumerate(criteres):
+            row = [critere]
+            for comp in ["Glove Voice", "SignAll", "MotionSavvy", "Kinemic", "DuoSign", "Google Live Transcribe", "Ava"]:
+                values = saved_data['competitors_comparison_table'].get(comp, [])
+                if i < len(values):
+                    row.append(values[i])
+                else:
+                    row.append("")
+            competitors_data.append(row)
+        
+        comp_table = Table(competitors_data, colWidths=[doc.width/4.0] + [doc.width/12.0]*7)
+        comp_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (7, 0), colors.lightgrey),
+            ('TEXTCOLOR', (0, 0), (7, 0), colors.black),
+            ('ALIGN', (0, 0), (7, 0), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        story.append(comp_table)
+        
+        # Ajouter la légende
+        story.append(Spacer(1, 0.1*inch))
+        story.append(Paragraph("<b>Légende :</b>", normal_style))
+        story.append(Paragraph("• + : Service présent", normal_style))
+        story.append(Paragraph("• - : Service absent", normal_style))
+        story.append(Paragraph("• T : Service partiellement présent", normal_style))
+    
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Business Model Canvas
+    story.append(Paragraph("7. Business Model Canvas (BMC) de Glove Voice", heading2_style))
+    
+    # Construire les données pour les sections du BMC
+    bmc_data = [
+        {
+            "titre": "Partenaires Clés",
+            "contenu": saved_data.get('bmc_partenaires', '')
+        },
+        {
+            "titre": "Activités Clés",
+            "contenu": saved_data.get('bmc_activites', '')
+        },
+        {
+            "titre": "Proposition de Valeur",
+            "contenu": saved_data.get('bmc_proposition', '')
+        },
+        {
+            "titre": "Relations avec les Clients",
+            "contenu": saved_data.get('bmc_relations', '')
+        },
+        {
+            "titre": "Segments de Clientèle",
+            "contenu": saved_data.get('bmc_segments', '')
+        },
+        {
+            "titre": "Ressources Clés",
+            "contenu": saved_data.get('bmc_ressources', '')
+        },
+        {
+            "titre": "Canaux",
+            "contenu": saved_data.get('bmc_canaux', '')
+        },
+        {
+            "titre": "Structure de Coûts",
+            "contenu": saved_data.get('bmc_couts', '')
+        },
+        {
+            "titre": "Sources de Revenus",
+            "contenu": saved_data.get('bmc_revenus', '')
+        }
+    ]
+    
+    # Pour chaque section du BMC
+    for section in bmc_data:
+        story.append(Paragraph(f"<b>{section['titre']}</b>", styles['Heading3']))
+        
+        # Traiter le contenu ligne par ligne
+        for line in section['contenu'].split('\n'):
+            if line.strip():
+                story.append(Paragraph(line, normal_style))
+        
+        story.append(Spacer(1, 0.1*inch))
+    
     story.append(Spacer(1, 0.2*inch))
     
     # Stratégie Commerciale
@@ -412,22 +696,68 @@ def generate_pdf():
     # Détails Techniques
     story.append(Paragraph("DÉTAILS TECHNIQUES", heading1_style))
     
-    # Prototype du Gant
-    story.append(Paragraph("1. Prototype", heading2_style))
-    for line in saved_data.get('comp', '').split('\n'):
+    # Étude technique
+    story.append(Paragraph("1. Étude technique du projet Glove Voice", heading2_style))
+    
+    # Prototype Gant Intelligent
+    story.append(Paragraph("1.1 Prototype Gant Intelligent Glove Voice", heading2_style))
+    
+    # Partie Électronique
+    story.append(Paragraph("Partie Électronique", styles['Heading3']))
+    for line in saved_data.get('tech_electronique', '').split('\n'):
+        if line.strip():
+            story.append(Paragraph(line, normal_style))
+    story.append(Spacer(1, 0.1*inch))
+    
+    # Partie Matériaux
+    story.append(Paragraph("Partie Étude des Matériaux", styles['Heading3']))
+    for line in saved_data.get('tech_materiaux', '').split('\n'):
         if line.strip():
             story.append(Paragraph(line, normal_style))
     story.append(Spacer(1, 0.2*inch))
     
     # Application Mobile
-    story.append(Paragraph("2. Application Mobile", heading2_style))
+    story.append(Paragraph("1.2 Application Mobile Glove Voice", heading2_style))
+    for line in saved_data.get('tech_application', '').split('\n'):
+        if line.strip():
+            story.append(Paragraph(line, normal_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Algorithmes et Traitement des Données
+    story.append(Paragraph("1.3 Algorithmes et Traitement des Données", heading2_style))
+    for line in saved_data.get('tech_algorithmes', '').split('\n'):
+        if line.strip():
+            story.append(Paragraph(line, normal_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Interface Utilisateur
+    story.append(Paragraph("1.4 Interface Utilisateur et Expérience", heading2_style))
+    for line in saved_data.get('tech_interface', '').split('\n'):
+        if line.strip():
+            story.append(Paragraph(line, normal_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Tests et Validation
+    story.append(Paragraph("1.5 Tests et Validation", heading2_style))
+    for line in saved_data.get('tech_tests', '').split('\n'):
+        if line.strip():
+            story.append(Paragraph(line, normal_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Sections originales
+    story.append(Paragraph("2. Prototype", heading2_style))
+    for line in saved_data.get('comp', '').split('\n'):
+        if line.strip():
+            story.append(Paragraph(line, normal_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    story.append(Paragraph("3. Application Mobile", heading2_style))
     for line in saved_data.get('app', '').split('\n'):
         if line.strip():
             story.append(Paragraph(line, normal_style))
     story.append(Spacer(1, 0.2*inch))
     
-    # Processus de Production
-    story.append(Paragraph("3. Processus de Production", heading2_style))
+    story.append(Paragraph("4. Processus de Production", heading2_style))
     for line in saved_data.get('prod', '').split('\n'):
         if line.strip():
             story.append(Paragraph(line, normal_style))
@@ -466,7 +796,10 @@ if st.sidebar.button("📄 Générer un PDF du rapport"):
 
 # Page 1: Présentation du Projet
 if page == "Présentation du Projet":
-    st.title("🧤 Glove Voice - Présentation du Projet")
+    # Ajout d'un input pour changer le titre du projet
+    projet_titre = create_input("Titre du Projet", "🧤 Glove Voice - Présentation du Projet", "projet_titre")
+    
+    st.title(projet_titre)
     
     st.header("1. Description du Projet")
     probleme = create_input("Problématique", 
@@ -510,7 +843,9 @@ if page == "Présentation du Projet":
 
 # Page 2: Analyse de Marché
 elif page == "Analyse de Marché":
-    st.title("📊 Analyse de Marché")
+    # Ajout d'un input pour changer le titre de la page
+    marche_titre = create_input("Titre de la Page", "📊 Analyse de Marché", "marche_titre")
+    st.title(marche_titre)
     
     st.header("1. Tendances du Marché")
     tendances = create_input("Tendances", 
@@ -566,6 +901,11 @@ elif page == "Analyse de Marché":
     }
     create_editable_table(concurrents_data, "marche_concurrents_table")
     
+    # Ajout du nouveau tableau comparatif détaillé des concurrents avec inputs
+    st.markdown("---")
+    create_competitor_comparison_table("competitors_comparison_table")
+    st.markdown("---")
+    
     st.subheader("Comparaison des Fonctionnalités Clés")
     comparison_data = {
         "Critères": ["Traduction temps réel", "App mobile", "Multilingue"],
@@ -587,6 +927,11 @@ elif page == "Analyse de Marché":
         "Concurrent 1": ["Caméras", "ASL", "Élevé"]
     }
     create_editable_table(matrice_data, "marche_matrice_table")
+    
+    # Ajout du Business Model Canvas avec inputs
+    st.markdown("---")
+    create_business_model_canvas("bmc")
+    st.markdown("---")
     
     st.header("6. Modèle d'Affaires")
     create_expandable_table("Partenaires Clés", 
@@ -619,7 +964,9 @@ elif page == "Analyse de Marché":
 
 # Page 3: Stratégie Commerciale
 elif page == "Stratégie Commerciale":
-    st.title("📈 Stratégie Commerciale")
+    # Ajout d'un input pour changer le titre de la page
+    strategie_titre = create_input("Titre de la Page", "📈 Stratégie Commerciale", "strategie_titre")
+    st.title(strategie_titre)
     
     st.header("1. Cibles Commerciales")
     st.subheader("Particuliers")
@@ -652,7 +999,9 @@ elif page == "Stratégie Commerciale":
 
 # Page 4: Plan Financier
 elif page == "Plan Financier":
-    st.title("💰 Plan Financier")
+    # Ajout d'un input pour changer le titre de la page
+    financier_titre = create_input("Titre de la Page", "💰 Plan Financier", "financier_titre")
+    st.title(financier_titre)
     
     st.header("1. Besoins de Financement")
     financement_data = {
@@ -685,26 +1034,71 @@ elif page == "Plan Financier":
 
 # Page 5: Détails Techniques
 elif page == "Détails Techniques":
-    st.title("⚙️ Détails Techniques")
+    # Ajout d'un input pour changer le titre de la page
+    technique_titre = create_input("Titre de la Page", "⚙️ Détails Techniques", "technique_titre")
+    st.title(technique_titre)
     
-    st.header("1. Prototype du Gant")
+    # Nouvelle section pour l'étude technique
+    st.header("1. Étude technique du projet Glove Voice")
+    
+    # Section prototype
+    st.subheader("1.1 Prototype Gant Intelligent Glove Voice")
+    
+    # Partie électronique
+    st.markdown("##### Partie Électronique")
+    partie_electronique = create_input("", 
+                                     "La conception du gant intelligent repose sur plusieurs composants électroniques essentiels. Tout d'abord, les capteurs jouent un rôle crucial : les capteurs de flexion mesurent la courbure des doigts (un capteur par doigt), tels que le Spectra Symbol Flex Sensor et les Flexpoint Bend Sensors. Les accéléromètres, comme le ADXL335 et le MPU-6050, mesurent les accélérations linéaires des mouvements de la main, tandis que les gyroscopes, également présents dans le MPU-6050, mesurent la rotation angulaire. En option, des magnétomètres tels que le HMC5883L peuvent être intégrés pour mesurer l'orientation par rapport au champ magnétique terrestre. Le cœur du gant est constitué d'un microcontrôleur, tel que l'Arduino Nano ou l'ESP32, qui collecte et traite les données des capteurs. Pour la communication, des modules Bluetooth (comme le HC-05) et Wi-Fi (ESP8266) sont utilisés, garantissant une connexion sans fil avec l'application mobile. Le circuit imprimé (PCB) est conçu sur mesure pour supporter les composants et faciliter l'assemblage. En ce qui concerne l'alimentation, une batterie rechargeable, par exemple une Li-Po 3.7V, alimente les capteurs et le microcontrôleur, avec un système de gestion de l'énergie incluant un régulateur de tension et un module de charge.",
+                                     "tech_electronique", text_area=True, height=300)
+    
+    # Partie étude des matériaux
+    st.markdown("##### Partie Étude des Matériaux")
+    partie_materiaux = create_input("", 
+                                  "Le choix des matériaux pour le gant est également déterminant pour son efficacité et son confort. Un tissu conducteur est utilisé dans les zones nécessitant la transmission de signaux électriques, tel que le nylon mélangé à de l'argent. Pour la couche de base, le Spandex ou le Lycra est privilégié, offrant une extensibilité pour un ajustement serré et confortable en contact avec la peau. Une fine couche de tissu non tissé est ajoutée entre cette couche et la couche extérieure pour améliorer le confort et éviter les irritations cutanées. Pour la protection de la batterie, située au niveau du coude, des matériaux robustes comme le Kevlar ou le Cordura sont intégrés, assurant une protection durable. Enfin, des câbles souples et des connecteurs, tels que les fils Dupont et les câbles flexibles plats (FFC/FPC), relient les capteurs et autres composants au microcontrôleur, garantissant une flexibilité et une fiabilité optimales dans l'assemblage du gant.",
+                                  "tech_materiaux", text_area=True, height=250)
+    
+    # Section application mobile
+    st.subheader("1.2 Application Mobile Glove Voice")
+    partie_application = create_input("", 
+                                   "L'application mobile Glove Voice permet une connexion rapide au gant intelligent via Bluetooth ou Wi-Fi (ESP32), assurant ainsi un transfert instantané des données. Les capteurs intégrés au gant transmettent les mouvements des mains et des doigts à l'application qui, grâce à des algorithmes d'intelligence artificielle avancés, les convertit en temps réel en texte et en paroles. L'interface utilisateur est conçue pour être intuitive, permettant une configuration rapide et un accès facile aux différentes fonctionnalités. L'application offre plusieurs modes de traduction : temps réel pour les conversations immédiates, mode d'enregistrement pour sauvegarder des phrases fréquemment utilisées, et mode d'apprentissage pour enseigner la langue des signes aux utilisateurs non-initiés. La personnalisation est au cœur de l'application, avec des paramètres ajustables pour la sensibilité de détection des gestes, le volume et la vitesse de la parole synthétisée, ainsi que le choix entre différentes voix et langues. Pour les environnements éducatifs et professionnels, des fonctionnalités spécifiques sont disponibles, comme la création de vocabulaires personnalisés et l'intégration avec d'autres systèmes de communication.",
+                                   "tech_application", text_area=True, height=250)
+    
+    # Section algorithmes et traitement des données
+    st.subheader("1.3 Algorithmes et Traitement des Données")
+    partie_algorithmes = create_input("", 
+                                    "Le système Glove Voice repose sur des algorithmes sophistiqués de traitement des données pour traduire avec précision les gestes en langage parlé. Les données brutes des capteurs sont d'abord prétraitées pour éliminer le bruit et normaliser les signaux. Ensuite, des algorithmes de reconnaissance de motifs basés sur l'apprentissage automatique (comme les réseaux de neurones profonds ou SVM) identifient les gestes spécifiques. Des modèles pré-entraînés, constamment améliorés par apprentissage continu, permettent une reconnaissance précise des signes standardisés et personnalisés. Le système intègre également des algorithmes de prédiction contextuelle pour améliorer la fluidité de la traduction, en suggérant des mots ou expressions probables basés sur le contexte de la conversation. Pour garantir des performances optimales même avec une connexion internet limitée, une partie du traitement est effectuée directement sur l'appareil, tandis que des modèles plus complexes peuvent être exécutés dans le cloud lorsque disponible.",
+                                    "tech_algorithmes", text_area=True, height=200)
+    
+    # Section interface utilisateur et expérience
+    st.subheader("1.4 Interface Utilisateur et Expérience")
+    partie_interface = create_input("", 
+                                  "L'interface utilisateur de Glove Voice a été développée selon les principes du design centré sur l'utilisateur, avec une attention particulière aux besoins des personnes sourdes et malentendantes. L'application se caractérise par une navigation intuitive avec des icônes claires et des instructions visuelles. Des retours haptiques et visuels sont intégrés pour confirmer les actions et les traductions. Le tableau de bord principal affiche en temps réel le texte traduit, avec options de sauvegarde, partage et modification. L'application inclut également un mode nuit, des options de personnalisation des couleurs et de la taille du texte, et une section d'aide contextuelle. Des tutoriels interactifs guident les nouveaux utilisateurs, tandis que l'historique des conversations et un dictionnaire de signes personnalisable enrichissent l'expérience. Des tests utilisateurs réguliers avec des personnes sourdes et malentendantes contribuent à l'amélioration continue de l'interface.",
+                                  "tech_interface", text_area=True, height=200)
+    
+    # Section tests et validation
+    st.subheader("1.5 Tests et Validation")
+    partie_tests = create_input("", 
+                              "Le processus de validation du système Glove Voice suit une méthodologie rigoureuse pour garantir fiabilité et précision. Des tests unitaires vérifient chaque composant (capteurs, algorithmes, interface) individuellement. Des tests d'intégration évaluent le fonctionnement combiné des composants. Des tests fonctionnels avec des utilisateurs réels dans diverses conditions (luminosité, bruit ambiant) mesurent la précision de reconnaissance. Des tests de performance évaluent la réactivité, la consommation d'énergie et la stabilité du système. Des sessions de feedback avec des interprètes en langue des signes et des représentants de la communauté sourde permettent d'ajuster le système. Des évaluations comparatives avec d'autres solutions existantes confirment les avantages distinctifs de Glove Voice. Le processus de validation est continu, avec des mises à jour régulières basées sur les retours utilisateurs et les avancées technologiques.",
+                              "tech_tests", text_area=True, height=200)
+    
+    # Garde les sections prototype et application originales
+    st.header("2. Prototype du Gant")
     composants = create_input("Composants", 
                             "- Capteurs flexion\n- Microcontrôleur\n- Bluetooth", 
                             "comp", text_area=True)
     
-    st.header("2. Application Mobile")
+    st.header("3. Application Mobile")
     app_mobile = create_input("App mobile", 
                             "- Reconnaissance gestuelle\n- Multilingue", 
                             "app", text_area=True)
     
-    st.header("3. Processus de Production")
+    st.header("4. Processus de Production")
     production = create_input("Production", 
                             "Prototypage avec ESITH...", 
                             "prod", text_area=True)
 
 # Pied de page
 st.markdown("---")
-st.caption("© 2024 Glove Voice - Tous droits réservés")
+
 
 # Bouton pour effacer toutes les données (optionnel)
 if st.sidebar.button("Réinitialiser toutes les données"):
