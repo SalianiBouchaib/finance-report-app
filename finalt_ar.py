@@ -1,4 +1,45 @@
 import streamlit as st
+
+# This MUST be the first Streamlit command
+st.set_page_config(
+    page_title="Simulateur d'Étude Financière", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Now import the rest of the libraries
+import pandas as pd
+import numpy as np
+
+# Handle optional dependencies with try/except
+try:
+    import numpy_financial as npf
+except ImportError:
+    st.warning("📚 La bibliothèque numpy-financial n'est pas installée. Certaines fonctionnalités financières avancées pourraient ne pas être disponibles.")
+    # Define a fallback implementation if needed
+    
+from datetime import datetime
+import plotly.express as px
+import json
+import os
+import tempfile
+import matplotlib.pyplot as plt
+from fpdf import FPDF
+
+try:
+    import pyfinance as pf
+except ImportError:
+    st.warning("📚 La bibliothèque PyFinance n'est pas installée. Certaines fonctionnalités financières avancées ne seront pas disponibles.")
+
+
+
+
+
+
+
+
+
+import streamlit as st
 import pandas as pd
 import numpy as np
 import numpy_financial as npf
