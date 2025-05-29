@@ -1,0 +1,25 @@
+# Core dependencies
+streamlit==1.45.1
+pandas==2.2.3
+numpy==2.2.6
+numpy-financial==1.0.0
+
+# Data visualization
+matplotlib==3.9.0
+plotly==5.21.0
+seaborn==0.13.2
+
+# PDF generation
+fpdf==1.7.2
+
+# Date/time handling
+python-dateutil==2.9.0
+
+# HTML parsing (for report generation)
+beautifulsoup4==4.12.3
+
+# Image processing
+pillow==11.2.1
+
+# Additional utilities
+regex==2024.11.6
