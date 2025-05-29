@@ -1,0 +1,25 @@
+# Core dependencies
+streamlit
+pandas
+numpy
+numpy-financial
+
+# Data visualization
+matplotlib
+plotly
+seaborn
+
+# Financial calculations
+pyfinance
+
+# PDF generation
+fpdf
+
+# HTML parsing (for report generation)
+beautifulsoup4
+
+# Image processing
+pillow
+
+# Additional utilities
+regex
