@@ -1,6 +1,6 @@
 import streamlit as st
 
-# This MUST be the first Streamlit command
+# This MUST be the first Streamlit command and fix amortissement détaillé so that its not static and depends on what is in bilan
 st.set_page_config(
     page_title="Simulateur d'Étude Financière", 
     layout="wide",
@@ -3438,6 +3438,78 @@ ventes,service,Service conseil,15000.00,20,0,0,2023-02-01"""
             st.error(f"Une erreur s'est produite lors du traitement du fichier : {str(e)}")
             st.info("Veuillez vérifier le format de votre fichier CSV et réessayer.")
 
+def show_finance_initiation():
+    st.header("🎓 Initiation à la Finance")
+    
+    st.markdown("""
+    ## Ressources de formation en finance
+    
+    Cette page regroupe des vidéos pédagogiques pour vous aider à comprendre les concepts fondamentaux de la finance et de la comptabilité.
+    """)
+    
+    # Section des vidéos YouTube
+    st.subheader("📺 Vidéos de formation")
+    
+    # Création de deux colonnes pour afficher les vidéos
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### Introduction aux états financiers")
+        st.video("https://www.youtube.com/watch?v=aCzHpBSOoV0")
+        st.markdown("""
+        **Comprendre les états financiers et leur importance**
+        
+        Cette vidéo explique les bases des états financiers et leur rôle dans la prise de décision.
+        """)
+        
+        st.markdown("### Analyse de trésorerie")
+        st.video("https://www.youtube.com/watch?v=8X3rFBIgBZ4")
+        st.markdown("""
+        **Importance de la gestion de trésorerie**
+        
+        Cette vidéo explique comment analyser et gérer efficacement la trésorerie d'une entreprise.
+        """)
+    
+    with col2:
+        st.markdown("### Comprendre le bilan")
+        st.video("https://www.youtube.com/watch?v=PpNXten9g98")
+        st.markdown("""
+        **Structure et analyse du bilan**
+        
+        Cette vidéo détaille la composition du bilan et comment l'interpréter.
+        """)
+        
+        st.markdown("### Principes d'amortissement")
+        st.video("https://www.youtube.com/watch?v=4VI46QkWgM4")
+        st.markdown("""
+        **Méthodes et calculs d'amortissement**
+        
+        Cette vidéo explique les différentes méthodes d'amortissement et leur impact financier.
+        """)
+    
+    # Section ressources supplémentaires
+    st.subheader("📚 Ressources supplémentaires")
+    
+    st.markdown("""
+    ### Glossaire financier
+    
+    * **Bilan** : État financier présentant le patrimoine d'une entreprise à un moment donné
+    * **Compte de résultat** : Document comptable présentant les produits et charges d'une entreprise
+    * **Amortissement** : Prise en compte de la dépréciation d'un actif sur sa durée d'utilisation
+    * **Trésorerie** : Ensemble des liquidités disponibles immédiatement
+    * **VAN (Valeur Actuelle Nette)** : Indicateur financier mesurant la rentabilité d'un investissement
+    * **TRI (Taux de Rentabilité Interne)** : Taux d'actualisation qui annule la VAN
+    
+    ### Conseils pour débutants
+    
+    1. **Commencez par comprendre les bases** : Maîtrisez d'abord les concepts de base comme le bilan, le compte de résultat et le tableau de flux de trésorerie.
+    
+    2. **Analysez les ratios financiers clés** : Apprenez à calculer et interpréter les ratios de liquidité, de rentabilité et d'endettement.
+    
+    3. **Pratiquez avec des cas réels** : Utilisez cet outil pour créer vos propres scénarios financiers et analyser les résultats.
+    
+    4. **Consultez un expert** : N'hésitez pas à consulter un comptable ou un conseiller financier pour valider vos analyses.
+    """)
 
 # ========== FONCTION PRINCIPALE ==========
 def main():
@@ -3447,7 +3519,7 @@ def main():
     # Titre de l'application
     st.title("💼 Simulateur d'Étude Financière")
     
-    # Menu de navigation avec la nouvelle option d'importation CSV
+    # Menu de navigation avec toutes les options incluant Initiation à la Finance
     menu = [
         "Fiche Entreprise", 
         "Investissements", 
@@ -3458,7 +3530,8 @@ def main():
         "Amortissement Détaillé",
         "Tableau de Trésorerie Mensuel", 
         "Budget TVA",
-        "📤 Importation CSV"  # Option existante
+        "Initiation à la Finance",  # Nouvelle option
+        "📤 Importation CSV"
     ]
     choice = st.sidebar.selectbox("Navigation", menu)
     
@@ -3471,7 +3544,7 @@ def main():
         st.caption(f"Date: {datetime.now().strftime('%d/%m/%Y')}")
         
         # Promotion de la nouvelle fonctionnalité
-        st.info("🆕 **NOUVEAU!** Importez vos données facilement par CSV")
+        st.info("🆕 **NOUVEAU!** Accédez à des vidéos explicatives dans 'Initiation à la Finance'")
         
         # Boutons d'actions globales
         st.write("#### Actions")
@@ -3592,11 +3665,10 @@ def main():
         show_monthly_cashflow()
     elif choice == "Budget TVA":
         show_vat_budget()
+    elif choice == "Initiation à la Finance":
+        show_finance_initiation()  # Nouvelle fonction pour afficher la page d'initiation à la finance
     elif choice == "📤 Importation CSV":
         show_csv_import()
-
-
-
 # ========== FICHE ENTREPRISE ==========
 def show_company_info():
     st.header("Fiche d'Entreprise")
@@ -4793,7 +4865,6 @@ def show_amortization():
                 help="Exportez les données au format CSV pour Excel"
             )
 
-# ========== AMORTISSEMENT DÉTAILLÉ ==========
 def show_detailed_amortization():
     st.header("📊 Tableau d'Amortissement des Immobilisations")
     
@@ -4803,68 +4874,181 @@ def show_detailed_amortization():
         with col1:
             years_to_display = st.slider("Nombre d'années à afficher", min_value=3, max_value=10, value=3)
         with col2:
-            sync_immobilisations = st.checkbox("Synchroniser avec les immobilisations", value=True)
+            sync_immobilisations = st.checkbox("Synchroniser avec le bilan", value=True)
+        
+        # Bouton pour réinitialiser complètement
+        if st.button("🔄 Réinitialiser toutes les valeurs"):
+            for i, item in enumerate(st.session_state.detailed_amortization):
+                st.session_state.detailed_amortization[i]["amount"] = 0.0
+                st.session_state.detailed_amortization[i]["amortization_n"] = 0.0
+                st.session_state.detailed_amortization[i]["amortization_n1"] = 0.0
+                st.session_state.detailed_amortization[i]["amortization_n2"] = 0.0
+            st.success("✅ Tableau d'amortissement réinitialisé")
+        
+        # Mode debug optionnel
+        debug_mode = st.checkbox("Mode debug", value=False, key="debug_mode", help="Afficher détails de synchronisation")
         
         if sync_immobilisations:
-            # Synchroniser avec les données d'immobilisations
-            if 'immos' in st.session_state and st.session_state.immos:
-                # Créer une correspondance entre les noms dans le tableau d'amortissement et les immobilisations
-                name_mapping = {
-                    "Frais préliminaire & d'approche": ["frais", "préliminaire", "approche"],
-                    "Terrain / Local": ["terrain", "local"],
-                    "Construction / Aménagement": ["construction", "aménagement", "amenagement"],
-                    "Matériel d'équipement": ["équipement", "equipement"],
-                    "Mobilier & matériel de bureau": ["mobilier", "bureau"],
-                    "Matériel de transport & manutension": ["transport", "manutention"],
-                    "Système d'information": ["système", "systeme", "information", "informatique"]
+            debug_info = []
+            debug_info.append("=== DÉBUT SYNCHRONISATION ===")
+            
+            # ÉTAPE 1: Vérifier l'état des sections du bilan
+            bilan_sections = {
+                'immobilisations_non_valeur': False,
+                'immobilisations_incorporelles': False,
+                'immobilisations_corporelles': False
+            }
+            
+            # Vérifier chaque section du bilan
+            for section in bilan_sections:
+                if section in st.session_state.actif_data:
+                    items = st.session_state.actif_data[section]
+                    if len(items) > 0 and any(item['value'] > 0 for item in items):
+                        bilan_sections[section] = True
+                        debug_info.append(f"Section '{section}' : NON VIDE")
+                    else:
+                        debug_info.append(f"Section '{section}' : VIDE")
+            
+            # ÉTAPE 2: Définir les correspondances entre sections du bilan et catégories d'amortissement
+            section_mapping = {
+                'immobilisations_non_valeur': ["Frais préliminaire & d'approche"],
+                'immobilisations_incorporelles': ["Système d'information"],
+                'immobilisations_corporelles': ["Terrain / Local", "Construction / Aménagement", 
+                                               "Matériel d'équipement", "Mobilier & matériel de bureau", 
+                                               "Matériel de transport & manutension"]
+            }
+            
+            # ÉTAPE 3: Réinitialiser les catégories dont les sections correspondantes sont vides
+            categories_to_reset = []
+            
+            for section, is_active in bilan_sections.items():
+                if not is_active:  # Si la section est vide
+                    for category in section_mapping.get(section, []):
+                        categories_to_reset.append(category)
+                        debug_info.append(f"Catégorie à réinitialiser: {category}")
+            
+            for i, item in enumerate(st.session_state.detailed_amortization):
+                if item["name"] in categories_to_reset:
+                    old_value = st.session_state.detailed_amortization[i]["amount"]
+                    if old_value > 0:
+                        st.session_state.detailed_amortization[i]["amount"] = 0.0
+                        st.session_state.detailed_amortization[i]["amortization_n"] = 0.0
+                        st.session_state.detailed_amortization[i]["amortization_n1"] = 0.0
+                        st.session_state.detailed_amortization[i]["amortization_n2"] = 0.0
+                        debug_info.append(f"RÉINITIALISÉ: {item['name']} de {old_value:.2f} à 0")
+            
+            # ÉTAPE 4: Collecter les valeurs pour les sections non vides
+            item_values = {}
+            
+            # Traitement des immobilisations non-valeur (frais préliminaires)
+            if bilan_sections['immobilisations_non_valeur']:
+                total_nonvaleur = sum(item['value'] for item in st.session_state.actif_data['immobilisations_non_valeur'])
+                if total_nonvaleur > 0:
+                    item_values["Frais préliminaire & d'approche"] = total_nonvaleur
+                    debug_info.append(f"Immobilisations non-valeur: {total_nonvaleur:.2f}")
+            
+            # Traitement des immobilisations incorporelles (système d'information)
+            if bilan_sections['immobilisations_incorporelles']:
+                total_incorporelles = sum(item['value'] for item in st.session_state.actif_data['immobilisations_incorporelles'])
+                if total_incorporelles > 0:
+                    item_values["Système d'information"] = total_incorporelles
+                    debug_info.append(f"Immobilisations incorporelles: {total_incorporelles:.2f}")
+            
+            # Traitement des immobilisations corporelles
+            if bilan_sections['immobilisations_corporelles']:
+                total_corporelles = sum(item['value'] for item in st.session_state.actif_data['immobilisations_corporelles'])
+                debug_info.append(f"Total immobilisations corporelles: {total_corporelles:.2f}")
+                
+                # Initialiser les valeurs par catégorie
+                categorized_values = {
+                    "Terrain / Local": 0.0,
+                    "Construction / Aménagement": 0.0,
+                    "Matériel d'équipement": 0.0,
+                    "Mobilier & matériel de bureau": 0.0,
+                    "Matériel de transport & manutension": 0.0
                 }
                 
-                # Parcourir les immobilisations et mettre à jour les montants
-                for immo in st.session_state.immos:
-                    immo_name = immo["Nom"].lower()
-                    for amort_name, keywords in name_mapping.items():
-                        if any(keyword in immo_name for keyword in keywords):
-                            # Trouver l'indice de cette immobilisation dans le tableau d'amortissement
-                            for i, item in enumerate(st.session_state.detailed_amortization):
-                                if item["name"] == amort_name:
-                                    # Mettre à jour le montant
-                                    st.session_state.detailed_amortization[i]["amount"] = immo["Montant"]
-                                    # Recalculer les amortissements
-                                    rate = st.session_state.detailed_amortization[i]["rate"] / 100
-                                    duration = st.session_state.detailed_amortization[i]["duration"]
-                                    if duration > 0:
-                                        annual_amort = immo["Montant"] * rate
-                                        st.session_state.detailed_amortization[i]["amortization_n"] = annual_amort
-                                        st.session_state.detailed_amortization[i]["amortization_n1"] = annual_amort
-                                        st.session_state.detailed_amortization[i]["amortization_n2"] = annual_amort
-                                    break
-                            break
+                # Catégoriser chaque élément des immobilisations corporelles
+                for item in st.session_state.actif_data['immobilisations_corporelles']:
+                    if item['value'] <= 0:
+                        continue
+                    
+                    label = item['label'].lower()
+                    value = item['value']
+                    categorized = False
+                    
+                    # Essayer de catégoriser selon le nom
+                    if "terrain" in label or "local" in label:
+                        categorized_values["Terrain / Local"] += value
+                        categorized = True
+                    elif "constru" in label or "aménag" in label or "amenage" in label:
+                        categorized_values["Construction / Aménagement"] += value
+                        categorized = True
+                    elif "équip" in label or "equip" in label or "techn" in label:
+                        categorized_values["Matériel d'équipement"] += value
+                        categorized = True
+                    elif "mobil" in label or "bureau" in label:
+                        categorized_values["Mobilier & matériel de bureau"] += value
+                        categorized = True
+                    elif "transport" in label or "manut" in label:
+                        categorized_values["Matériel de transport & manutension"] += value
+                        categorized = True
+                    else:
+                        # Si pas de correspondance, considérer comme "Construction / Aménagement"
+                        categorized_values["Construction / Aménagement"] += value
+                        debug_info.append(f"Élément non catégorisé '{item['label']}' ({value:.2f}) ajouté à Construction/Aménagement")
+                        categorized = True
+                
+                # Vérifier si on a réussi à catégoriser les immobilisations
+                categorized_total = sum(categorized_values.values())
+                if abs(categorized_total - total_corporelles) > 0.01:
+                    debug_info.append(f"ATTENTION: Différence entre total catégorisé ({categorized_total:.2f}) et total corporelles ({total_corporelles:.2f})")
+                
+                # Si aucune catégorisation n'a été faite mais qu'il y a des valeurs
+                if categorized_total < 0.01 and total_corporelles > 0:
+                    debug_info.append("Aucune immobilisation corporelle catégorisée, distribution par défaut")
+                    categorized_values["Terrain / Local"] = total_corporelles * 0.3
+                    categorized_values["Construction / Aménagement"] = total_corporelles * 0.4
+                    categorized_values["Matériel d'équipement"] = total_corporelles * 0.2
+                    categorized_values["Mobilier & matériel de bureau"] = total_corporelles * 0.1
+                
+                # Ajouter les valeurs catégorisées au dictionnaire principal
+                for cat, value in categorized_values.items():
+                    if value > 0:
+                        item_values[cat] = value
+                        debug_info.append(f"Catégorie '{cat}' : {value:.2f}")
             
-            # Synchroniser avec les frais préliminaires
-            if 'frais_preliminaires' in st.session_state and st.session_state.frais_preliminaires:
-                total_frais = sum(frais["valeur"] for frais in st.session_state.frais_preliminaires)
-                for i, item in enumerate(st.session_state.detailed_amortization):
-                    if item["name"] == "Frais préliminaire & d'approche":
-                        st.session_state.detailed_amortization[i]["amount"] = total_frais
-                        rate = st.session_state.detailed_amortization[i]["rate"] / 100
-                        annual_amort = total_frais * rate
-                        st.session_state.detailed_amortization[i]["amortization_n"] = annual_amort
-                        st.session_state.detailed_amortization[i]["amortization_n1"] = annual_amort
-                        st.session_state.detailed_amortization[i]["amortization_n2"] = annual_amort
-                        break
+            # ÉTAPE 5: Mettre à jour le tableau d'amortissement avec les valeurs collectées
+            updates_made = 0
+            for i, item in enumerate(st.session_state.detailed_amortization):
+                amort_name = item["name"]
+                if amort_name in item_values:
+                    new_amount = item_values[amort_name]
+                    old_amount = st.session_state.detailed_amortization[i]["amount"]
+                    
+                    # Mettre à jour uniquement si la valeur a changé significativement
+                    if abs(new_amount - old_amount) > 0.01:
+                        st.session_state.detailed_amortization[i]["amount"] = new_amount
+                        
+                        # Recalculer les amortissements si la durée est positive
+                        if st.session_state.detailed_amortization[i]["duration"] > 0:
+                            rate = st.session_state.detailed_amortization[i]["rate"] / 100
+                            annual_amort = new_amount * rate
+                            st.session_state.detailed_amortization[i]["amortization_n"] = annual_amort
+                            st.session_state.detailed_amortization[i]["amortization_n1"] = annual_amort
+                            st.session_state.detailed_amortization[i]["amortization_n2"] = annual_amort
+                        
+                        updates_made += 1
+                        debug_info.append(f"Mise à jour de {amort_name}: {old_amount:.2f} → {new_amount:.2f}")
             
-            # Synchroniser avec le système d'information
-            if 'investment_data' in st.session_state and 'web_dev' in st.session_state.investment_data:
-                web_dev = st.session_state.investment_data['web_dev']
-                for i, item in enumerate(st.session_state.detailed_amortization):
-                    if item["name"] == "Système d'information":
-                        st.session_state.detailed_amortization[i]["amount"] = web_dev
-                        rate = st.session_state.detailed_amortization[i]["rate"] / 100
-                        annual_amort = web_dev * rate
-                        st.session_state.detailed_amortization[i]["amortization_n"] = annual_amort
-                        st.session_state.detailed_amortization[i]["amortization_n1"] = annual_amort
-                        st.session_state.detailed_amortization[i]["amortization_n2"] = annual_amort
-                        break
+            # ÉTAPE 6: Afficher le résultat de la synchronisation
+            if updates_made > 0:
+                st.success(f"✅ {updates_made} éléments mis à jour depuis le bilan!")
+            
+            # Afficher les informations de débogage si activées
+            if debug_mode and debug_info:
+                with st.expander("Détails de synchronisation", expanded=True):
+                    st.code('\n'.join(debug_info))
     
     # Édition des données du tableau d'amortissement
     with st.expander("🛠️ Édition des immobilisations et taux d'amortissement", expanded=False):
@@ -4890,22 +5074,28 @@ def show_detailed_amortization():
         
         # Mettre à jour les données de session avec les valeurs éditées
         st.session_state.detailed_amortization = edited_df.to_dict('records')
+    
+    # Option pour recalculer les amortissements
+    if st.button("Recalculer les amortissements"):
+        updates = 0
+        for i, item in enumerate(st.session_state.detailed_amortization):
+            if item["duration"] > 0 and item["amount"] > 0:
+                rate = item["rate"] / 100
+                annual_amort = item["amount"] * rate
+                st.session_state.detailed_amortization[i]["amortization_n"] = annual_amort
+                st.session_state.detailed_amortization[i]["amortization_n1"] = annual_amort
+                st.session_state.detailed_amortization[i]["amortization_n2"] = annual_amort
+                updates += 1
         
-        # Option pour recalculer automatiquement les amortissements
-        if st.button("Recalculer les amortissements"):
-            for i, item in enumerate(st.session_state.detailed_amortization):
-                if item["duration"] > 0:
-                    rate = item["rate"] / 100
-                    annual_amort = item["amount"] * rate
-                    st.session_state.detailed_amortization[i]["amortization_n"] = annual_amort
-                    st.session_state.detailed_amortization[i]["amortization_n1"] = annual_amort
-                    st.session_state.detailed_amortization[i]["amortization_n2"] = annual_amort
+        if updates > 0:
+            st.success(f"✅ Amortissements recalculés avec succès pour {updates} élément(s)!")
+        else:
+            st.warning("Aucun élément à recalculer (montants ou durées à zéro)")
     
     # Affichage du tableau d'amortissement
     st.subheader("Tableau d'Amortissement")
     
     # Construction des données pour l'affichage
-    # Créer les colonnes pour les années
     columns = ["Immobilisation", "Montant à amortir", "Durée (année)", "Taux"]
     years = ["N", "N+1", "N+2"] + [f"N+{i}" for i in range(3, years_to_display)]
     columns.extend(years)
@@ -4962,7 +5152,7 @@ def show_detailed_amortization():
     # Créer le DataFrame
     df = pd.DataFrame(data, columns=columns)
     
-    # Fonction pour styliser le tableau - AMÉLIORÉE POUR FOND SOMBRE
+    # Fonction pour styliser le tableau
     def style_amortization_table(df):
         # Créer un formatage sécurisé qui vérifie le type avant d'appliquer le format
         formatter = {}
@@ -5112,7 +5302,6 @@ def show_detailed_amortization():
         mime="text/csv",
         help="Télécharger le tableau au format CSV"
     )
-
 # ========== TABLEAU DE TRÉSORERIE MENSUEL ==========
 def show_monthly_cashflow():
     st.header("📊 Tableau de Trésorerie Mensuel")
