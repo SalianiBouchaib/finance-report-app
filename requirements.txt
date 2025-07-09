@@ -23,3 +23,10 @@ pillow==11.2.1
 
 # Additional utilities
 regex==2024.11.6
+
+# WiFi Network Analyzer dependencies
+python-nmap==0.7.1
+scapy==2.5.0
+psutil==6.1.0
+requests==2.32.3
+netifaces==0.11.0

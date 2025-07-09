@@ -72,6 +72,14 @@ except ImportError:
 # Ignorer les avertissements de dépréciation
 warnings.filterwarnings('ignore')
 
+# Import WiFi analyzer UI (with error handling for dependencies)
+try:
+    from wifi_analyzer_ui import show_wifi_analyzer_page
+    WIFI_ANALYZER_AVAILABLE = True
+except ImportError as e:
+    WIFI_ANALYZER_AVAILABLE = False
+    WIFI_IMPORT_ERROR = str(e)
+
 # Continue with the rest of your code...
 
 
@@ -3511,6 +3519,44 @@ def show_finance_initiation():
     4. **Consultez un expert** : N'hésitez pas à consulter un comptable ou un conseiller financier pour valider vos analyses.
     """)
 
+def show_wifi_analyzer():
+    """Display WiFi Network Analyzer interface"""
+    if WIFI_ANALYZER_AVAILABLE:
+        show_wifi_analyzer_page()
+    else:
+        st.error("🚫 WiFi Network Analyzer non disponible")
+        st.warning(f"Erreur d'importation: {WIFI_IMPORT_ERROR if 'WIFI_IMPORT_ERROR' in globals() else 'Dépendances manquantes'}")
+        
+        st.info("""
+        **Dépendances manquantes pour l'analyseur WiFi:**
+        
+        Pour utiliser l'analyseur WiFi, installez les dépendances suivantes:
+        ```bash
+        pip install python-nmap scapy psutil requests netifaces
+        ```
+        
+        **Note:** Cette fonctionnalité fonctionne mieux sur Windows avec les outils netsh.
+        """)
+        
+        # Show a basic placeholder
+        st.header("🌐 WiFi Network Analyzer")
+        st.markdown("""
+        ### Fonctionnalités disponibles (une fois les dépendances installées):
+        
+        - 📡 **Analyse des réseaux WiFi** avec calcul de distance basé sur RSSI
+        - 🔍 **Découverte de périphériques** via Nmap, UPnP et mDNS
+        - 🗺️ **Visualisation de topologie réseau** avec positionnement précis
+        - ⏱️ **Surveillance en temps réel** avec historique
+        - 🔒 **Analyse de sécurité** et recommandations
+        - 📤 **Export KML** pour Google Earth et formats CSV/JSON
+        
+        ### Capacités d'analyse:
+        - Calcul de distance avec précision ±1-2m via RSSI
+        - Trilatération pour positionnement multi-AP
+        - Analyse de la couverture réseau
+        - Détection d'anomalies de sécurité
+        """)
+
 # ========== FONCTION PRINCIPALE ==========
 def main():
     # Initialisation des données
@@ -3531,6 +3577,7 @@ def main():
         "Tableau de Trésorerie Mensuel", 
         "Budget TVA",
         "Initiation à la Finance",  # Nouvelle option
+        "🌐 WiFi Network Analyzer",  # Nouvelle fonctionnalité WiFi
         "📤 Importation CSV"
     ]
     choice = st.sidebar.selectbox("Navigation", menu)
@@ -3545,6 +3592,7 @@ def main():
         
         # Promotion de la nouvelle fonctionnalité
         st.info("🆕 **NOUVEAU!** Accédez à des vidéos explicatives dans 'Initiation à la Finance'")
+        st.success("🌐 **NOUVEAU!** Analyseur WiFi professionnel intégré pour analyser votre réseau")
         
         # Boutons d'actions globales
         st.write("#### Actions")
@@ -3667,6 +3715,8 @@ def main():
         show_vat_budget()
     elif choice == "Initiation à la Finance":
         show_finance_initiation()  # Nouvelle fonction pour afficher la page d'initiation à la finance
+    elif choice == "🌐 WiFi Network Analyzer":
+        show_wifi_analyzer()  # Nouvelle fonction pour l'analyseur WiFi
     elif choice == "📤 Importation CSV":
         show_csv_import()
 # ========== FICHE ENTREPRISE ==========
